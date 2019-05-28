@@ -383,7 +383,7 @@ static bool cliDefaultPrintLinef(dumpFlags_t dumpMask, bool equalsDefault, const
     }
 }
 
-static void cliPrintf(const char *format, ...)
+void cliPrintf(const char *format, ...)
 {
     va_list va;
     va_start(va, format);

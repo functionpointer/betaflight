@@ -56,7 +56,8 @@
 #define SMARTAUDIO_POLLING_WINDOW   1000    // Time window after command polling for state change
 
 #ifdef USE_SMARTAUDIO_DPRINTF
-serialPort_t *debugSerialPort = NULL;
+timeMs_t lastdebug = 0;
+//serialPort_t *debugSerialPort = NULL;
 #endif // USE_SMARTAUDIO_DPRINTF
 
 static serialPort_t *smartAudioSerialPort = NULL;
@@ -281,6 +282,7 @@ static void saProcessResponse(uint8_t *buf, int len)
         saDevice.channel = buf[2];
         if(saDevice.version != 3) {
             saDevice.power = buf[3];
+            dprintf(("saProcessResponse received legacy power %d\r\n",buf[3]));
         }
         saDevice.mode = buf[4];
         saDevice.freq = (buf[5] << 8)|buf[6];
@@ -708,6 +710,7 @@ bool vtxSmartAudioInit(void)
     }
 #endif
 #ifdef USE_SMARTAUDIO_DPRINTF
+/*
     // Setup debugSerialPort
 
     debugSerialPort = openSerialPort(DPRINTF_SERIAL_PORT, FUNCTION_NONE, NULL, NULL, 115200, MODE_RXTX, 0);
@@ -715,8 +718,9 @@ bool vtxSmartAudioInit(void)
         setPrintfSerialPort(debugSerialPort);
         dprintf(("smartAudioInit: OK\r\n"));
     }
+*/
+    dprintf(("smartAudioInit: OK\r\n"));
 #endif
-
     serialPortConfig_t *portConfig = findSerialPortConfig(FUNCTION_VTX_SMARTAUDIO);
     if (portConfig) {
         portOptions_e portOptions = SERIAL_STOPBITS_2 | SERIAL_BIDIR_NOPULL;
@@ -856,17 +860,17 @@ static void vtxSAProcess(vtxDevice_t *vtxDevice, timeUs_t currentTimeUs)
 
     if ((sa_outstanding != SA_CMD_NONE) && (nowMs - sa_lastTransmissionMs > SMARTAUDIO_CMD_TIMEOUT)) {
         // Last command timed out
-        // dprintf(("process: resending 0x%x\r\n", sa_outstanding));
+        dprintf(("process: resending 0x%x\r\n", sa_outstanding));
         // XXX Todo: Resend termination and possible offline transition
         saResendCmd();
     lastCommandSentMs = nowMs;
     } else if (!saQueueEmpty()) {
         // Command pending. Send it.
-        // dprintf(("process: sending queue\r\n"));
+        dprintf(("process: sending queue\r\n"));
         saSendQueue();
     lastCommandSentMs = nowMs;
     } else if ((nowMs - lastCommandSentMs < SMARTAUDIO_POLLING_WINDOW) && (nowMs - sa_lastTransmissionMs >= SMARTAUDIO_POLLING_INTERVAL)) {
-    //dprintf(("process: sending status change polling\r\n"));
+    dprintf(("process: sending status change polling\r\n"));
     saGetSettings();
     saSendQueue();
     }

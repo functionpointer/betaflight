@@ -25,11 +25,10 @@
 
 #include "platform.h"
 
-//#define USE_SMARTAUDIO_DPRINTF
+#define USE_SMARTAUDIO_DPRINTF
 #ifdef USE_SMARTAUDIO_DPRINTF
-#include "io/serial.h"
-#include "common/printf.h"
-#include "common/printf_serial.h"
+#include "cli/cli.h"
+#include "drivers/time.h"
 #endif
 
 #define VTX_SMARTAUDIO_MIN_BAND 1
@@ -102,9 +101,8 @@ void saSetPitFreq(uint16_t freq);
 bool vtxSmartAudioInit(void);
 
 #ifdef USE_SMARTAUDIO_DPRINTF
-#define DPRINTF_SERIAL_PORT SERIAL_PORT_USART3
-extern serialPort_t *debugSerialPort;
-#define dprintf(x) if (debugSerialPort) tfp_printf x
+extern timeMs_t lastdebug;
+#define dprintf(x) if (cliMode) {cliPrintf("(%d ms) ",millis() - lastdebug);cliPrintf x ;lastdebug = millis();}
 #else
 #define dprintf(x)
 #endif // USE_SMARTAUDIO_DPRINTF
