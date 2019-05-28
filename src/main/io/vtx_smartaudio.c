@@ -955,7 +955,7 @@ static void vtxSASetPitMode(vtxDevice_t *vtxDevice, uint8_t onoff)
         newMode |= SA_MODE_SET_OUT_RANGE_PITMODE;
     }
 
-    if (saDevice.mode & SA_MODE_GET_IN_RANGE_PITMODE || !(saDevice.mode & SA_MODE_GET_OUT_RANGE_PITMODE)) {
+    if (saDevice.mode & SA_MODE_GET_IN_RANGE_PITMODE || (onoff && !(saDevice.mode & SA_MODE_GET_OUT_RANGE_PITMODE))) {
         // ensure when turning on pit mode that pit mode gets actually enabled
         newMode |= SA_MODE_SET_IN_RANGE_PITMODE;
     }
